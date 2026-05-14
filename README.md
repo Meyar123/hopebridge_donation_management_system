@@ -191,4 +191,3 @@ For technical support or questions about the project, please refer to the projec
 
 **Note**: This is a development version. For production use, additional security measures and configuration changes are required.
 
-# Trigger redeploy
