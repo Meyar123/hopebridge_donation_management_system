@@ -1,0 +1,7 @@
+Hello {{ activity.volunteer.name }},
+
+A new volunteer, {{ volunteer.name }}, has joined your activity "{{ activity.title }}".
+Volunteer contact: {{ volunteer.email }}
+
+Thank you for organizing activities with HopeBridge,
+HopeBridge Team

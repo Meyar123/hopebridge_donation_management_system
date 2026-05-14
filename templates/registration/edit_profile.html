@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Donation Management System</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #667eea; font-size: 2rem; margin-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px 15px; border: 2px solid #e1e5e9; border-radius: 10px; font-size: 16px; transition: border-color 0.3s ease; background-color: #f8f9fa; }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #667eea; background-color: white; }
+        .btn { width: 100%; padding: 15px; background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.3s ease; margin-top: 20px; }
+        .btn:hover { transform: translateY(-2px); }
+        .links { text-align: center; margin-top: 20px; }
+        .links a { color: #667eea; text-decoration: none; }
+        .links a:hover { text-decoration: underline; }
+        .success-message { background: #e8f5e9; color: #388e3c; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Edit Your Profile</h1>
+        </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Full Name <span style="color:red">*</span></label>
+                <input type="text" name="name" id="name" value="{{ user.name }}" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" name="email" id="email" value="{{ user.email }}" disabled>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number <span style="color:red">*</span></label>
+                <input type="tel" name="phone" id="phone" value="{{ user.phone }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address_street">Street Address <span style="color:red">*</span></label>
+                <input type="text" name="address_street" id="address_street" value="{{ user.address_street }}" required>
+                <input type="hidden" name="latitude" id="latitude" value="{{ user.latitude }}">
+                <input type="hidden" name="longitude" id="longitude" value="{{ user.longitude }}">
+                <input id="map-autocomplete" type="text" placeholder="Search address on map..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc; margin-top:10px;">
+                <div id="map" style="height: 250px; width: 100%; margin-top: 10px; border-radius: 10px;"></div>
+            </div>
+            <div class="form-group">
+                <label for="address_apartment">Apartment/Suite/Unit<span style="color:red">*</span></label>
+                <input type="text" name="address_apartment" id="address_apartment" value="{{ user.address_apartment }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address_city">City <span style="color:red">*</span></label>
+                <input type="text" name="address_city" id="address_city" value="{{ user.address_city }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address_postal_code">Postal Code <span style="color:red">*</span></label>
+                <input type="text" name="address_postal_code" id="address_postal_code" value="{{ user.address_postal_code }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address_country">Country <span style="color:red">*</span></label>
+                <input type="text" name="address_country" id="address_country" value="{{ user.address_country }}" required>
+            </div>
+            <div class="form-group">
+                <label for="address_instructions">Additional Instructions</label>
+                <textarea name="address_instructions" id="address_instructions" rows="2">{{ user.address_instructions }}</textarea>
+            </div>
+            <button type="submit" class="btn">Save Changes</button>
+        </form>
+        <div class="links">
+             <a href="{% url 'password_reset' %}">Forgot or want to change your password?</a><br>
+            <a href="{% url 'profile_redirect' %}">&larr; Back to Dashboard</a>
+        </div>
+    </div>
+    <!-- Google Maps Address Integration -->
+    <script>
+        window.GOOGLE_MAPS_API_KEY = '{{ GOOGLE_MAPS_API_KEY|default:"" }}';
+    </script>
+    <script src="{% static 'js/google_maps_address.js' %}"></script>
+</body>
+</html> 

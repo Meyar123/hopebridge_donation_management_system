@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Donation Management - Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        
+        .nav { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav a { color: #667eea; text-decoration: none; margin-right: 20px; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        .nav a.active { color: #333; font-weight: bold; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .filter-controls { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filter-controls select, .filter-controls input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px; }
+        .filter-controls button { padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .filter-controls input[type="text"] { width: 200px; }
+        
+        .table-container { background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .table th { background: #f8f9fa; font-weight: 600; color: #333; }
+        .table tr:hover { background: #f5f5f5; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .status-available { background: #d4edda; color: #155724; }
+        .status-claimed { background: #fff3cd; color: #856404; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-unavailable { background: #f8d7da; color: #721c24; }
+        
+        .action-btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.8rem; white-space: nowrap; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        
+        .item-image { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        .no-image { width: 50px; height: 50px; background: #f8f9fa; border: 2px dashed #ddd; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 0.7rem; color: #999; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎁 Donation Management</h1>
+        <p>Manage and monitor all donations in the system</p>
+    </div>
+    
+    <div class="nav">
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_user_management' %}">User Management</a>
+        <a href="{% url 'admin_donation_management' %}" class="active">Donation Management</a>
+        <a href="{% url 'admin_activity_logs' %}">Activity Logs</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+    
+    <div class="container">
+        <!-- Filters -->
+        <div class="filter-controls">
+            <form method="get">
+                <label>Status:</label>
+                <select name="status">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                    <option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+                    <option value="claimed" {% if status_filter == 'claimed' %}selected{% endif %}>Claimed</option>
+                    <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+                    <option value="unavailable" {% if status_filter == 'unavailable' %}selected{% endif %}>Unavailable</option>
+                </select>
+                
+                <label>Category:</label>
+                <select name="category">
+                    <option value="all" {% if category_filter == 'all' %}selected{% endif %}>All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category }}" {% if category_filter == category %}selected{% endif %}>{{ category }}</option>
+                    {% endfor %}
+                </select>
+                
+                <label>Search:</label>
+                <input type="text" name="search" placeholder="Search donations..." value="{{ search_query }}">
+                
+                <button type="submit">Filter</button>
+                {% if status_filter != 'all' or category_filter != 'all' or search_query %}
+                <a href="{% url 'admin_donation_management' %}" style="margin-left: 10px; color: #666; text-decoration: none;">Clear Filters</a>
+                {% endif %}
+            </form>
+        </div>
+        
+        <!-- Donations Table -->
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Condition</th>
+                        <th>Donor</th>
+                        <th>Recipient</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation in donations %}
+                    <tr>
+                        <td>
+                            {% if donation.item.image_url %}
+                                <img src="{{ donation.item.image_url }}" alt="{{ donation.item.name }}" class="item-image">
+                            {% else %}
+                                <div class="no-image">No Image</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ donation.item.name }}</strong>
+                            {% if donation.item.description %}
+                                <br><small style="color: #666;">{{ donation.item.description|truncatewords:8 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ donation.item.category }}</td>
+                        <td>{{ donation.item.condition }}</td>
+                        <td>
+                            <strong>{{ donation.donor_name }}</strong>
+                            <br><small style="color: #666;">{{ donation.donor_email }}</small>
+                        </td>
+                        <td>
+                            {% if donation.recipient_name %}
+                                <strong>{{ donation.recipient_name }}</strong>
+                                <br><small style="color: #666;">{{ donation.recipient_email }}</small>
+                            {% else %}
+                                <span style="color: #999;">Not claimed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ donation.status }}">
+                                {{ donation.status|title }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ donation.created_at|date:"M d, Y" }}
+                            <br><small style="color: #666;">{{ donation.created_at|timesince }} ago</small>
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                {% if donation.status == 'claimed' %}
+                                    <form method="post" action="{% url 'admin_ship_donation' donation.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="action-btn btn-info"
+                                                onclick="return confirm('Mark this donation as shipped?')">
+                                            🚚 Ship
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                
+                                <!-- Delete Donation Form -->
+                                <form method="post" action="{% url 'admin_delete_donation' donation.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="action-btn btn-danger"
+                                            onclick="return confirm('Are you sure you want to delete this donation? This action cannot be undone.')">
+                                        🗑️ Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: #999; padding: 30px;">
+                            {% if status_filter != 'all' or category_filter != 'all' or search_query %}
+                                No donations found matching your filters.
+                            {% else %}
+                                No donations found.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if donations %}
+        <div style="margin-top: 20px; text-align: center; color: #666;">
+            Showing {{ donations|length }} donation{{ donations|length|pluralize }}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

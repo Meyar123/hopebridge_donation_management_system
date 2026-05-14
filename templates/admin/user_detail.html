@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Detail - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        
+        .nav { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav a { color: #667eea; text-decoration: none; margin-right: 20px; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .user-card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .user-card h3 { color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        
+        .user-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .info-group { }
+        .info-label { font-weight: bold; color: #333; margin-bottom: 5px; }
+        .info-value { color: #666; margin-bottom: 15px; }
+        
+        .status-active { color: #28a745; font-weight: bold; }
+        .status-blocked { color: #dc3545; font-weight: bold; }
+        
+        .roles { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+        .role-badge { background: #667eea; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.9rem; }
+        
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; font-size: 0.9rem; margin-right: 10px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ffc107; color: #212529; }
+        
+        .data-table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .data-table th { background: #f8f9fa; font-weight: 600; color: #333; }
+        .data-table tr:hover { background: #f8f9fa; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .status-available { background: #d4edda; color: #155724; }
+        .status-claimed { background: #fff3cd; color: #856404; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        
+        .messages { margin-bottom: 20px; }
+        .message { padding: 10px; border-radius: 5px; margin-bottom: 10px; }
+        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👤 User Detail</h1>
+        <p>View and manage user information</p>
+    </div>
+    
+    <div class="nav">
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_user_management' %}">User Management</a>
+        <a href="{% url 'admin_donation_management' %}">Donation Management</a>
+        <a href="{% url 'admin_activity_logs' %}">Activity Logs</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+    
+    <div class="container">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- User Information -->
+        <div class="user-card">
+            <h3>👤 User Information</h3>
+            <div class="user-info">
+                <div class="info-group">
+                    <div class="info-label">Name:</div>
+                    <div class="info-value">{{ user.name }}</div>
+                    
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">{{ user.email }}</div>
+                    
+                    <div class="info-label">Phone:</div>
+                    <div class="info-value">{{ user.phone }}</div>
+                </div>
+                
+                <div class="info-group">
+                    <div class="info-label">Status:</div>
+                    <div class="info-value">
+                        {% if user.is_active %}
+                            <span class="status-active">Active</span>
+                        {% else %}
+                            <span class="status-blocked">Blocked</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="info-label">Joined:</div>
+                    <div class="info-value">{{ user.date_joined|date:"M d, Y H:i" }}</div>
+                    
+                    <div class="info-label">Last Login:</div>
+                    <div class="info-value">
+                        {% if user.last_login %}
+                            {{ user.last_login|date:"M d, Y H:i" }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Address Information -->
+            {% if user.address %}
+            <div style="margin-top: 20px;">
+                <div class="info-label">Address:</div>
+                <div class="info-value">
+                    {{ user.address.street }}{% if user.address.apartment %}, {{ user.address.apartment }}{% endif %}<br>
+                    {{ user.address.city }}, {{ user.address.postal_code }}<br>
+                    {{ user.address.country }}
+                    {% if user.address.instructions %}
+                        <br><small style="color: #666;">Instructions: {{ user.address.instructions }}</small>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Roles -->
+            <div style="margin-top: 20px;">
+                <div class="info-label">Roles:</div>
+                <div class="roles">
+                    {% if donor %}
+                        <span class="role-badge">Donor</span>
+                    {% endif %}
+                    {% if recipient %}
+                        <span class="role-badge">Recipient</span>
+                    {% endif %}
+                    {% if volunteer %}
+                        <span class="role-badge">Volunteer</span>
+                    {% endif %}
+                    {% if not donor and not recipient and not volunteer %}
+                        <span class="role-badge" style="background: #6c757d;">No Roles</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div style="margin-top: 20px;">
+                <!-- Toggle User Status Form -->
+                <form method="post" action="{% url 'admin_toggle_user_status' user.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}"
+                            onclick="return confirm('Are you sure you want to {% if user.is_active %}block{% else %}unblock{% endif %} this user?')">
+                        {% if user.is_active %}Block User{% else %}Unblock User{% endif %}
+                    </button>
+                </form>
+                
+                <!-- Delete User Form -->
+                <form method="post" action="{% url 'admin_delete_user' user.id %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" 
+                            class="btn btn-danger"
+                            onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                        Delete User
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- User's Donations -->
+        {% if user_donations %}
+        <div class="data-table">
+            <h3 style="padding: 20px; margin: 0; color: #667eea; border-bottom: 2px solid #f0f0f0;">🎁 User's Donations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation_data in user_donations %}
+                    <tr>
+                        <td>
+                            <strong>{{ donation_data.item.name }}</strong>
+                            {% if donation_data.item.description %}
+                                <br><small style="color: #666;">{{ donation_data.item.description|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ donation_data.item.category }}</td>
+                        <td>
+                            <span class="status-badge status-{{ donation_data.donation.status }}">
+                                {{ donation_data.donation.status|title }}
+                            </span>
+                        </td>
+                        <td>{{ donation_data.donation.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        
+        <!-- User's Claimed Donations -->
+        {% if claimed_donations %}
+        <div class="data-table">
+            <h3 style="padding: 20px; margin: 0; color: #667eea; border-bottom: 2px solid #f0f0f0;">📦 Claimed Donations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Claimed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation_data in claimed_donations %}
+                    <tr>
+                        <td>
+                            <strong>{{ donation_data.item.name }}</strong>
+                            {% if donation_data.item.description %}
+                                <br><small style="color: #666;">{{ donation_data.item.description|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ donation_data.item.category }}</td>
+                        <td>
+                            <span class="status-badge status-{{ donation_data.donation.status }}">
+                                {{ donation_data.donation.status|title }}
+                            </span>
+                        </td>
+                        <td>{{ donation_data.donation.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        
+        <!-- User's Activities -->
+        {% if user_activities %}
+        <div class="data-table">
+            <h3 style="padding: 20px; margin: 0; color: #667eea; border-bottom: 2px solid #f0f0f0;">🤝 User's Activities</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in user_activities %}
+                    <tr>
+                        <td>
+                            <strong>{{ activity.title }}</strong>
+                            {% if activity.description %}
+                                <br><small style="color: #666;">{{ activity.description|truncatewords:10 }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ activity.category }}</td>
+                        <td>{{ activity.location }}</td>
+                        <td>{{ activity.activity_date|date:"M d, Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

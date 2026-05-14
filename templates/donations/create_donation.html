@@ -1,0 +1,217 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Donation - Donation Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+        }
+        
+        .required {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Create a New Donation</h1>
+            <p>Fill out the details below to list an item for donation</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="name">Item Name <span class="required">*</span></label>
+                <input type="text" name="name" id="name" required placeholder="e.g., Winter Jacket, Children's Books" oninput="autoDetectCategory()">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description <span class="required">*</span></label>
+                <textarea name="description" id="description" rows="4" required placeholder="Provide details about the item, its size, condition, and any other relevant information."></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Category <span class="required">*</span></label>
+                    <select name="category" id="category" required>
+                        <option value="">Select a category</option>
+                        <option value="Clothing">Clothing</option>
+                        <option value="Books">Books</option>
+                        <option value="Electronics">Electronics</option>
+                        <option value="Furniture">Furniture</option>
+                        <option value="Toys">Toys</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div id="category-autodetect-msg" style="color: #388e3c; font-size: 0.95em; margin-top: 5px; display: none;">Category auto-detected. You can change it if needed.</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="condition">Condition <span class="required">*</span></label>
+                    <select name="condition" id="condition" required>
+                        <option value="">Select the condition</option>
+                        <option value="New">New</option>
+                        <option value="Like New">Like New</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="image">Upload Image</label>
+                <input type="file" name="image" id="image" accept="image/*">
+            </div>
+            
+            <div class="form-group">
+                <label for="item_location">Item Location (for pickup/meeting)</label>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 10px;">Optional: Select the location where recipients can pick up this item. You can search for an address or drag the marker to the exact location.</p>
+                <input id="map-autocomplete" type="text" placeholder="Search location on map..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;">
+                <div id="map" style="height: 250px; width: 100%; margin-top: 10px; border-radius: 10px;"></div>
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+            </div>
+            
+            <button type="submit" class="btn">Submit Donation</button>
+        </form>
+        
+        <div class="links">
+            <a href="{% url 'donor_dashboard' %}">← Back to Dashboard</a>
+        </div>
+    </div>
+    <!-- Google Maps Location Picker for Donations -->
+    <script>
+        window.GOOGLE_MAPS_API_KEY = '{{ GOOGLE_MAPS_API_KEY|default:"" }}';
+    </script>
+    <script src="{% static 'js/donation_location_picker.js' %}"></script>
+    <script>
+    function autoDetectCategory() {
+        const name = document.getElementById('name').value.toLowerCase();
+        let category = 'Other';
+        if (/(shirt|pants|jacket|clothes|dress|skirt|coat|sweater)/.test(name)) category = 'Clothing';
+        else if (/(book|novel|magazine|textbook)/.test(name)) category = 'Books';
+        else if (/(phone|laptop|tablet|tv|television|camera|electronics)/.test(name)) category = 'Electronics';
+        else if (/(sofa|table|chair|desk|bed|furniture|cabinet)/.test(name)) category = 'Furniture';
+        else if (/(toy|game|puzzle|lego|doll)/.test(name)) category = 'Toys';
+        const categorySelect = document.getElementById('category');
+        if (!categorySelect.dataset.userSelected || categorySelect.value === '' || categorySelect.value === 'Other') {
+            categorySelect.value = category;
+            document.getElementById('category-autodetect-msg').style.display = 'block';
+        } else {
+            document.getElementById('category-autodetect-msg').style.display = 'none';
+        }
+    }
+    document.getElementById('category').addEventListener('change', function() {
+        this.dataset.userSelected = true;
+        document.getElementById('category-autodetect-msg').style.display = 'none';
+    });
+    </script>
+</body>
+</html> 

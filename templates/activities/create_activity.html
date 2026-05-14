@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Activity - Donation Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        
+        .nav { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav a { color: #28a745; text-decoration: none; margin-right: 20px; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        
+        .form-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-card h2 { color: #28a745; margin-bottom: 20px; text-align: center; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
+        .form-group textarea { height: 100px; resize: vertical; }
+        .form-group small { color: #666; font-size: 0.9rem; }
+        .form-group.required label:after { content: " *"; color: #dc3545; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        .btn { padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 16px; margin: 5px; }
+        .btn-primary { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { opacity: 0.9; }
+        
+        .back-link { text-align: center; margin-top: 20px; }
+        .back-link a { color: #28a745; text-decoration: none; }
+        .back-link a:hover { text-decoration: underline; }
+        
+        .error { background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        .success { background: #d4edda; color: #155724; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        
+        .tips { background: #e7f3ff; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #28a745; }
+        .tips h3 { color: #28a745; margin-bottom: 10px; }
+        .tips ul { list-style: none; }
+        .tips li { padding: 3px 0; color: #555; }
+        .tips li:before { content: "💡 "; }
+        
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Create Volunteer Activity</h1>
+        <p>Share your skills and create opportunities for others to volunteer</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div style="background: #f8f9fa; padding: 15px 20px; border-left: 4px solid #28a745;">
+            {% for message in messages %}
+                <div style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 12px; margin-bottom: 10px; font-weight: 500;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="nav">
+        <a href="{% url 'volunteer_dashboard' %}">Dashboard</a>
+        <a href="{% url 'activity_list' %}">Browse Activities</a>
+        <a href="{% url 'create_activity' %}">Create Activity</a>
+        <a href="{% url 'profile_redirect' %}">Profile</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="form-card">
+            <h2>Create New Activity</h2>
+            
+            <div class="tips">
+                <h3>Tips for Creating a Great Activity</h3>
+                <ul>
+                    <li>Write a clear, descriptive title that explains what volunteers will do</li>
+                    <li>Provide detailed information about the activity and what to expect</li>
+                    <li>Choose an appropriate category to help people find your activity</li>
+                    <li>Set realistic participant limits based on your capacity</li>
+                    <li>Include any special requirements or skills needed</li>
+                </ul>
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group required">
+                    <label for="title">Activity Title</label>
+                    <input type="text" id="title" name="title" required placeholder="e.g., Community Garden Cleanup">
+                    <small>Give your activity a clear, descriptive title.</small>
+                </div>
+                
+                <div class="form-group required">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" required placeholder="Describe what volunteers will be doing, what they should bring, and what to expect..."></textarea>
+                    <small>Provide detailed information about the activity.</small>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group required">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" required>
+                            <option value="">Select a category</option>
+                            <option value="Education">Education</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Community">Community</option>
+                            <option value="Environment">Environment</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group required">
+                        <label for="location">Location</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="location" name="location" required placeholder="e.g., Central Park, 123 Main St" style="flex: 1;">
+                            <button type="button" id="search-location" class="btn btn-secondary" style="padding: 8px 16px;">🔍 Search</button>
+                        </div>
+                        <small>Type to search for a location, press Enter, or click Search. You can also click on the map to set coordinates.</small>
+                    </div>
+                </div>
+                
+                <!-- Google Maps Location Picker -->
+                <div class="form-group">
+                    <label>Set Location on Map</label>
+                    <div id="map" style="height: 400px; width: 100%; border-radius: 5px; border: 1px solid #ddd;"></div>
+                    <div style="margin-top: 10px;">
+                        <button type="button" id="get-current-location" class="btn btn-secondary" style="margin-right: 10px;">📍 Use My Current Location</button>
+                        <button type="button" id="clear-location" class="btn btn-secondary">🗑️ Clear Location</button>
+                    </div>
+                    <small>Click on the map to set the exact location for your activity</small>
+                </div>
+                
+                <!-- Hidden fields for coordinates -->
+                <input type="hidden" id="latitude" name="latitude">
+                <input type="hidden" id="longitude" name="longitude">
+                
+                <div class="form-row">
+                    <div class="form-group required">
+                        <label for="activity_date">Activity Date & Time</label>
+                        <input type="datetime-local" id="activity_date" name="activity_date" required>
+                    </div>
+                    <div class="form-group required">
+                        <label for="duration_hours">Duration (hours)</label>
+                        <input type="number" id="duration_hours" name="duration_hours" min="1" max="24" value="2" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group required">
+                        <label for="max_participants">Maximum Participants</label>
+                        <input type="number" id="max_participants" name="max_participants" min="1" value="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contact_info">Contact Information</label>
+                        <input type="text" id="contact_info" name="contact_info" placeholder="Phone, email, or other contact method">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="requirements">Special Requirements</label>
+                    <textarea id="requirements" name="requirements" placeholder="Any special skills, equipment, or requirements volunteers should know about..."></textarea>
+                    <small>Optional: Let volunteers know about any special requirements.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image">Activity Image</label>
+                    <input type="file" id="image" name="image" accept="image/*">
+                    <small>Optional: Upload an image that represents your activity.</small>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button type="submit" class="btn btn-primary">Create Activity</button>
+                    <a href="{% url 'volunteer_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+            
+            <div class="back-link">
+                <a href="{% url 'volunteer_dashboard' %}">← Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Maps Integration -->
+    <script>
+        window.GOOGLE_MAPS_API_KEY = '{{ GOOGLE_MAPS_API_KEY|default:"" }}';
+    </script>
+    <script src="{% static 'js/google_maps.js' %}"></script>
+</body>
+</html>
+

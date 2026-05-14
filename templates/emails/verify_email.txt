@@ -1,0 +1,9 @@
+Hello,
+
+Your HopeBridge verification code is: {{ code }}
+
+Enter this code on the website to verify your email.
+If you didn’t request this, you can ignore this message.
+
+Thanks,
+The HopeBridge Team

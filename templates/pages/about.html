@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About • HopeBridge{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#0f172a; --bg2:#111827; --panel:#0b1226; --panel2:#0e152b; --line:#ffffff22;
+    --text:#e2e8f0; --muted:#cbd5e1;
+    --brand:#22d3ee; --brand2:#a78bfa; --accent:#10b981;
+  }
+  html,body{height:100%}
+  body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 800px at 10% -10%, #0b1226 0%, #0f172a 50%, #111827 100%)}
+  *{box-sizing:border-box}
+
+  .about-wrap{max-width:1200px;margin:0 auto;padding:20px}
+
+  /* (השארתי את סגנונות ה-hero למקרה שתרצי להחזיר בעתיד) */
+  .hero{
+    position:relative; border-radius:28px; overflow:hidden;
+    min-height:420px; aspect-ratio:16/9; max-height:620px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45); background:#000; isolation:isolate;
+  }
+  .hero-bg{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:grayscale(100%) contrast(1.05) brightness(.82); transform:scale(1.02)}
+  .hero-overlay{position:absolute; inset:0; background:
+      radial-gradient(70% 60% at 50% 35%, rgba(34,211,238,.35), transparent 70%),
+      linear-gradient(180deg, rgba(0,0,0,.70), rgba(0,0,0,.18) 40%, rgba(0,0,0,.65)); z-index:1}
+  .hero-content{position:absolute; inset:0; z-index:2; display:grid; place-items:center; text-align:center; padding:24px; color:var(--text)}
+  .title{margin:0; font-weight:800; letter-spacing:.3px; line-height:1.05; font-size:clamp(40px,7vw,86px);
+    background:linear-gradient(90deg,#fff,#dbeafe); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:0 3px 14px rgba(0,0,0,.35)}
+  .tag{margin-top:12px; font-weight:600; color:#e5e7eb; font-size:clamp(16px,2.5vw,28px); text-shadow:0 2px 10px rgba(0,0,0,.35)}
+  .cta{margin-top:20px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+  .btn{padding:12px 18px; border-radius:12px; border:1px solid #ffffff22; cursor:pointer; font-weight:700; text-decoration:none; transition:transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease}
+  .btn:hover{transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.35)}
+  .btn-primary{background:linear-gradient(90deg,var(--brand),var(--brand2)); color:#041018}
+  .btn-ghost{background:transparent; color:#e2e8f0; border-color:#ffffff44}
+  .btn-ghost:hover{background:#ffffff10}
+
+  /* פס זהות */
+  .brand-strip{
+    margin:18px auto 0; max-width:1000px; border-radius:16px; overflow:hidden;
+    border:1px solid var(--line); background:#0b1226; box-shadow:0 12px 32px rgba(0,0,0,.4);
+  }
+  .brand-strip img{display:block; width:100%; height:auto}
+
+  /* מקטעים */
+  .section{
+    margin:26px auto 0; max-width:1000px; color:var(--text);
+    background:linear-gradient(180deg,var(--panel),var(--panel2));
+    border:1px solid var(--line); border-radius:18px; padding:26px;
+    box-shadow:0 12px 36px rgba(0,0,0,.45);
+  }
+  .section h2{
+    margin:0 0 12px; font-size:clamp(22px,3.2vw,32px); font-weight:800;
+    background:linear-gradient(90deg,#e2e8f0,#c7d2fe,#22d3ee); -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lead{margin:8px 0 0; color:var(--muted); line-height:1.9; font-size:17px}
+
+  /* צוות */
+  .team{display:grid; gap:18px; grid-template-columns:repeat(12,1fr)}
+  .member{grid-column:span 12}
+  @media(min-width:920px){ .member{grid-column:span 4} }
+  .card{
+    height:100%; padding:16px; border-radius:16px; border:1px solid var(--line);
+    background:linear-gradient(180deg,#0b1226 0%, #0f172a 100%);
+    box-shadow:0 10px 28px rgba(0,0,0,.45);
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  }
+  .card:hover{transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.6); border-color:#ffffff33}
+  .row{display:flex; gap:14px; align-items:center}
+  .avatar{width:96px; height:96px; border-radius:14px; object-fit:cover; background:#0b1226; border:1px solid #ffffff22; flex:0 0 auto}
+  .name{margin:0; font-weight:800; font-size:18px; color:#f8fafc}
+  .role{margin:2px 0 0; color:#93c5fd; font-size:13px}
+  .bio{margin:10px 0 0; color:#cbd5e1; line-height:1.75}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-wrap">
+
+  {# --- HERO הוסר לפי הבקשה --- #}
+
+  <!-- פס זהות -->
+  <figure class="brand-strip" aria-label="HopeBridge identity">
+    <img src="{% static 'images/hopebridge-logo-hero.jpg' %}" alt="HopeBridge — Connecting hearts, building hope">
+  </figure>
+
+  <!-- About -->
+  <section class="section" aria-labelledby="about-title">
+    <h2 id="about-title">About Us</h2>
+    <p class="lead">We are a dedicated team from <em>Maghar</em>, driven by compassion, unity, and hope. Our journey began after the tragic events of <strong>October 7, 2023</strong>, which reminded us of the importance of solidarity, volunteering, and mutual responsibility.</p>
+    <p class="lead">This platform was born from that spirit. We believe that every act of kindness matters, and that by connecting donors, recipients, and volunteers, we can transform challenges into opportunities for healing, resilience, and hope.</p>
+  </section>
+
+  <!-- Team -->
+  <section class="section" aria-labelledby="team-title">
+    <h2 id="team-title">Meet Our Team</h2>
+    <div class="team">
+
+      <article class="member">
+        <div class="card">
+          <div class="row">
+            <img class="avatar" src="{% static 'images/majd.jpg' %}" alt="Majd Saad"
+                 onerror="this.src='{% static 'images/avatar-fallback.png' %}'">
+            <div>
+              <h3 class="name">Majd Saad — 29</h3>
+              <p class="role">NVIDIA • Software • Information Systems</p>
+            </div>
+          </div>
+          <p class="bio">Majd began as a Software Engineering Practical Engineer and later pursued Information Systems in Safed. He brings vision, structure, and innovation — and believes progress is measured by the impact we create for others.</p>
+        </div>
+      </article>
+
+      <article class="member">
+        <div class="card">
+          <div class="row">
+            <img class="avatar" src="{% static 'images/razan.jpg' %}" alt="Razan Saad"
+                 onerror="this.src='{% static 'images/avatar-fallback.png' %}'">
+            <div>
+              <h3 class="name">Razan Saad — 24</h3>
+              <p class="role">Information Systems • Safed</p>
+            </div>
+          </div>
+          <p class="bio">Razan blends creativity with precision to make technology warm, human-centered, and accessible, ensuring a safe and welcoming experience.</p>
+        </div>
+      </article>
+
+      <article class="member">
+        <div class="card">
+          <div class="row">
+            <img class="avatar" src="{% static 'images/meyar.jpg' %}" alt="Meyar Ganem"
+                 onerror="this.src='{% static 'images/avatar-fallback.png' %}'">
+            <div>
+              <h3 class="name">Meyar Ganem — 22</h3>
+              <p class="role">Information Systems • Safed</p>
+            </div>
+          </div>
+          <p class="bio">Meyar brings energy, empathy, and strong community spirit. For her, technology is about people, trust, and everyday kindness.</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- Vision -->
+  <section class="section" aria-labelledby="vision-title">
+    <h2 id="vision-title">Our Vision</h2>
+    <p class="lead">Inspired by the events of October 7th, our vision is to bring people together through kindness and purpose.
+This platform was created to support those in need, reduce waste, and build a stronger, more connected community.
+Every act of giving — no matter how small — creates hope, protects our planet, and reminds us that <strong>together, we can rebuild a brighter future.</strong></p>
+  </section>
+
+</div>
+{% endblock %}

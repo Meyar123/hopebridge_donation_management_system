@@ -1,0 +1,189 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<style>
+#result_list th {
+    white-space: nowrap;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+}
+#result_list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+#result_list {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+.results {
+    overflow-x: visible;
+    width: 100%;
+}
+#content-main {
+    width: 100%;
+    max-width: none;
+}
+.module {
+    width: 100%;
+    max-width: none;
+}
+.button {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 2px;
+    background-color: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+    border: none;
+    cursor: pointer;
+}
+.button:hover {
+    background-color: #205067;
+    color: white;
+}
+.button[style*="color: #dc3545"] {
+    background-color: #dc3545;
+}
+.button[style*="color: #dc3545"]:hover {
+    background-color: #c82333;
+}
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="module">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Users ({{ total_count }} total)</h2>
+            <div>
+                <a href="#" class="button" onclick="addUser()">Add New User</a>
+                <a href="#" class="button" onclick="exportUsers()">Export Users</a>
+                <a href="#" class="button" onclick="refreshUsers()">Refresh</a>
+            </div>
+        </div>
+        <div class="results">
+            <table id="result_list" style="width: 100%; table-layout: auto;">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">ID</th>
+                        <th style="width: 150px;">Username</th>
+                        <th style="width: 250px;">Email</th>
+                        <th style="width: 150px;">First Name</th>
+                        <th style="width: 150px;">Last Name</th>
+                        <th style="width: 100px;">Is Active</th>
+                        <th style="width: 180px;">Date Joined</th>
+                        <th style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.first_name }}</td>
+                        <td>{{ user.last_name }}</td>
+                        <td>{{ user.is_active|yesno:"Yes,No" }}</td>
+                        <td>{{ user.date_joined|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="#" class="button" onclick="viewUser('{{ user.id }}')">View</a>
+                            <a href="#" class="button" onclick="editUser('{{ user.id }}')">Edit</a>
+                            <a href="#" class="button" onclick="toggleUserStatus('{{ user.id }}', {{ user.is_active|yesno:"true,false" }})">
+                                {{ user.is_active|yesno:"Deactivate,Activate" }}
+                            </a>
+                            <a href="#" class="button" onclick="deleteUser('{{ user.id }}')" style="color: #dc3545;">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">No users found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if users.has_other_pages %}
+        <div class="paginator">
+            {% if users.has_previous %}
+                <a href="?page={{ users.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ users.number }} of {{ users.paginator.num_pages }}
+            </span>
+            
+            {% if users.has_next %}
+                <a href="?page={{ users.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewUser(userId) {
+    alert('View user: ' + userId + '\nThis would open a detailed view of the user.');
+    // In a real implementation, this would redirect to a user detail page
+    // window.location.href = '/admin/users/' + userId + '/view/';
+}
+
+function editUser(userId) {
+    alert('Edit user: ' + userId + '\nThis would open an edit form for the user.');
+    // In a real implementation, this would redirect to an edit page
+    // window.location.href = '/admin/users/' + userId + '/edit/';
+}
+
+function toggleUserStatus(userId, isActive) {
+    const action = isActive ? 'deactivate' : 'activate';
+    if (confirm('Are you sure you want to ' + action + ' this user?')) {
+        alert(action.charAt(0).toUpperCase() + action.slice(1) + ' user: ' + userId);
+        // In a real implementation, this would make an AJAX call
+        // fetch('/admin/users/' + userId + '/toggle-status/', {method: 'POST'})
+        //     .then(() => location.reload());
+    }
+}
+
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        alert('Delete user: ' + userId);
+        // In a real implementation, this would make an AJAX call
+        // fetch('/admin/users/' + userId + '/delete/', {method: 'POST'})
+        //     .then(() => location.reload());
+    }
+}
+
+function addUser() {
+    alert('Add new user\nThis would open a form to create a new user.');
+    // In a real implementation, this would redirect to an add page
+    // window.location.href = '/admin/users/add/';
+}
+
+function exportUsers() {
+    alert('Export users\nThis would download a CSV/Excel file of all users.');
+    // In a real implementation, this would trigger a download
+    // window.location.href = '/admin/users/export/';
+}
+
+function refreshUsers() {
+    location.reload();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Donations - Donation Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        .filters {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .filter-group select, .filter-group input {
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filter-group button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-group button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .donations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .donation-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .donation-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .donation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .donation-title {
+            color: #667eea;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .donation-status {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .donation-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .donation-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .detail-label {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 3px;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .donation-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .nav-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .nav-buttons .btn {
+            margin: 0 10px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            background: white;
+            border-radius: 15px;
+            padding: 60px 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state h3 {
+            color: #667eea;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .message {
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .image-modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 5%;
+            animation: zoomIn 0.3s ease;
+        }
+        
+        .image-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .image-modal-close:hover {
+            color: #bbb;
+        }
+        
+        .image-modal-caption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            height: 150px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes zoomIn {
+            from { transform: scale(0.5); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Available Donations</h1>
+            <p>Browse through the list of items available for donation</p>
+        </div>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <form method="get" class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="category">Category</label>
+                    <select name="category" id="category" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if cat == current_category %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="condition">Condition</label>
+                    <select name="condition" id="condition" onchange="this.form.submit()">
+                        <option value="">All Conditions</option>
+                        {% for cond in conditions %}
+                            <option value="{{ cond }}" {% if cond == current_condition %}selected{% endif %}>{{ cond }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="search">Search</label>
+                    <input type="search" name="search" id="search" placeholder="Search by name or description..." value="{{ search_query|default:'' }}">
+                </div>
+                <div class="filter-group">
+                    <label>&nbsp;</label>
+                    <button type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+        
+        <div class="donations-grid">
+            {% if donations %}
+                {% for donation in donations %}
+                <div class="donation-card">
+                    <div class="donation-header">
+                        <div class="donation-title">
+                            {% if donation.item.name %}
+                                {{ donation.item.name }}
+                            {% else %}
+                                {{ donation.name|default:"Unnamed Item" }}
+                            {% endif %}
+                        </div>
+                        <div class="donation-status">
+                            {% if donation.status %}
+                                {{ donation.status|title }}
+                            {% else %}
+                                Available
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if donation.item.image %}
+                    <div class="donation-image" style="margin-bottom: 15px; text-align: center;">
+                        <img src="{{ donation.item.image.url }}" alt="{{ donation.item.name }}" 
+                             style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover; cursor: pointer;"
+                             onclick="openImageModal('{{ donation.item.image.url }}', '{{ donation.item.name }}')">
+                    </div>
+                    {% elif donation.image_url %}
+                    <div class="donation-image" style="margin-bottom: 15px; text-align: center;">
+                        <img src="{{ donation.image_url }}" alt="{{ donation.name }}" 
+                             style="max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover; cursor: pointer;"
+                             onclick="openImageModal('{{ donation.image_url }}', '{{ donation.name }}')">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="donation-description">
+                        {% if donation.item.description %}
+                            {{ donation.item.description|truncatewords:20 }}
+                        {% else %}
+                            {{ donation.description|truncatewords:20|default:"No description provided" }}
+                        {% endif %}
+                    </div>
+                    
+                    <div class="donation-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Category</div>
+                            <div class="detail-value">
+                                {% if donation.item.category %}
+                                    {{ donation.item.category }}
+                                {% else %}
+                                    {{ donation.category|default:"Not specified" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Condition</div>
+                            <div class="detail-value">
+                                {% if donation.item.condition %}
+                                    {{ donation.item.condition }}
+                                {% else %}
+                                    {{ donation.condition|default:"Not specified" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Donor</div>
+                            <div class="detail-value">
+                                {% if donation.donor.user.name %}
+                                    {{ donation.donor.user.name }}
+                                {% else %}
+                                    {{ user.name|default:"Anonymous" }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Date</div>
+                            <div class="detail-value">
+                                {% if donation.created_at %}
+                                    {{ donation.created_at|date:"M d, Y" }}
+                                {% else %}
+                                    Today
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="detail-item" style="grid-column: span 2;">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">
+                                {% if donation.item.item_location %}
+                                    {{ donation.item.item_location }}
+                                {% elif donation.item_location %}
+                                    {{ donation.item_location }}
+                                {% else %}
+                                    Not provided
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="donation-actions">
+                        {% if user.is_authenticated and user.recipient_profile %}
+                            <a href="{% url 'claim_donation' donation.id %}" class="btn btn-success">Claim Item</a>
+                        {% elif not user.is_authenticated %}
+                            <a href="{% url 'login' %}" class="btn btn-secondary">Login to Claim</a>
+                        {% elif user.donor_profile %}
+                            <span class="btn btn-secondary" style="cursor: default;">Donors cannot claim</span>
+                        {% endif %}
+                        {% if donation.item.image %}
+                            <button onclick="openImageModal('{{ donation.item.image.url }}', '{{ donation.item.name }}')" class="btn btn-primary" style="margin-left: 8px;">View Image</button>
+                        {% elif donation.image_url %}
+                            <button onclick="openImageModal('{{ donation.image_url }}', '{{ donation.name }}')" class="btn btn-primary" style="margin-left: 8px;">View Image</button>
+                        {% endif %}
+                        {% if donation.item.latitude and donation.item.longitude %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ donation.item.latitude }},{{ donation.item.longitude }}" target="_blank" class="btn btn-primary" style="margin-left: 8px;">View on Google Maps</a>
+                        {% elif donation.latitude and donation.longitude %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ donation.latitude }},{{ donation.longitude }}" target="_blank" class="btn btn-primary" style="margin-left: 8px;">View on Google Maps</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>No Donations Available</h3>
+                    <p>There are no available donations at the moment. Please check back later!</p>
+                    {% if user.is_authenticated and user.donor_profile %}
+                        <a href="{% url 'create_donation' %}" class="btn btn-primary">Create First Donation</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="nav-buttons">
+           {% if user.is_authenticated and user.donor_profile %}
+                <a href="{% url 'dashboard_selection' %}" class="btn btn-secondary">← Back to Dashboard</a>
+                <a href="{% url 'create_donation' %}" class="btn btn-primary">Create Donation</a>
+            {% endif %}
+        </div>
+</div>
+
+    </div>
+    
+    <div id="imageModal" class="image-modal">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <img class="image-modal-content" id="modalImage">
+        <div id="modalCaption" class="image-modal-caption"></div>
+    </div>
+    
+    <script>
+        function openImageModal(imageSrc, imageName) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            const caption = document.getElementById('modalCaption');
+            
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+            caption.innerHTML = imageName;
+        }
+        
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside the image
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeImageModal();
+            }
+        });
+    </script>
+</body>
+</html> 

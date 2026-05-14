@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Unauthorized Access{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 50px auto; padding: 20px; text-align: center;">
+    <h1 style="color: #e53e3e; margin-bottom: 20px;">Access Denied</h1>
+    <p style="font-size: 18px; margin-bottom: 30px; color: #4a5568;">
+        You don't have permission to access this page. Please log in with appropriate credentials.
+    </p>
+    <div style="margin-top: 30px;">
+        <a href="{% url 'login' %}" style="
+            background: #3182ce; 
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            font-weight: 600;
+            display: inline-block;
+            margin-right: 10px;
+        ">Login</a>
+        <a href="{% url 'register' %}" style="
+            background: #38a169; 
+            color: white; 
+            padding: 12px 24px; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            font-weight: 600;
+            display: inline-block;
+        ">Register</a>
+    </div>
+</div>
+{% endblock %}

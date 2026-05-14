@@ -1,0 +1,173 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<style>
+#result_list th {
+    white-space: nowrap;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+}
+#result_list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+#result_list {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+.results {
+    overflow-x: visible;
+    width: 100%;
+}
+#content-main {
+    width: 100%;
+    max-width: none;
+}
+.module {
+    width: 100%;
+    max-width: none;
+}
+.button {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 2px;
+    background-color: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+    border: none;
+    cursor: pointer;
+}
+.button:hover {
+    background-color: #205067;
+    color: white;
+}
+.button[style*="color: #dc3545"] {
+    background-color: #dc3545;
+}
+.button[style*="color: #dc3545"]:hover {
+    background-color: #c82333;
+}
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="module">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Activities ({{ total_count }} total)</h2>
+            <div>
+                <a href="#" class="button" onclick="addActivity()">Add New Activity</a>
+                <a href="#" class="button" onclick="exportActivities()">Export Activities</a>
+                <a href="#" class="button" onclick="refreshActivities()">Refresh</a>
+            </div>
+        </div>
+        <div class="results">
+            <table id="result_list" style="width: 100%; table-layout: auto;">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Activity ID</th>
+                        <th style="width: 200px;">Title</th>
+                        <th style="width: 300px;">Description</th>
+                        <th style="width: 150px;">Volunteer</th>
+                        <th style="width: 150px;">Date</th>
+                        <th style="width: 120px;">Status</th>
+                        <th style="width: 180px;">Created At</th>
+                        <th style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in activities %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ item.activity.id }}</td>
+                        <td>{{ item.activity.title }}</td>
+                        <td>{{ item.activity.description|truncatechars:50 }}</td>
+                        <td>{{ item.volunteer_user.username|default:"Unknown" }}</td>
+                        <td>{{ item.activity.date|date:"M d, Y" }}</td>
+                        <td>{{ item.activity.status }}</td>
+                        <td>{{ item.activity.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="#" class="button" onclick="viewActivity('{{ item.activity.id }}')">View</a>
+                            <a href="#" class="button" onclick="editActivity('{{ item.activity.id }}')">Edit</a>
+                            <a href="#" class="button" onclick="updateActivityStatus('{{ item.activity.id }}', '{{ item.activity.status }}')">Update Status</a>
+                            <a href="#" class="button" onclick="deleteActivity('{{ item.activity.id }}')" style="color: #dc3545;">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">No activities found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if activities.has_other_pages %}
+        <div class="paginator">
+            {% if activities.has_previous %}
+                <a href="?page={{ activities.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ activities.number }} of {{ activities.paginator.num_pages }}
+            </span>
+            
+            {% if activities.has_next %}
+                <a href="?page={{ activities.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewActivity(activityId) {
+    alert('View activity: ' + activityId + '\nThis would open a detailed view of the activity.');
+}
+
+function editActivity(activityId) {
+    alert('Edit activity: ' + activityId + '\nThis would open an edit form for the activity.');
+}
+
+function updateActivityStatus(activityId, currentStatus) {
+    const newStatus = prompt('Update activity status for ID: ' + activityId + '\nCurrent status: ' + currentStatus + '\nEnter new status:', currentStatus);
+    if (newStatus && newStatus !== currentStatus) {
+        alert('Update activity status to: ' + newStatus);
+    }
+}
+
+function deleteActivity(activityId) {
+    if (confirm('Are you sure you want to delete this activity? This action cannot be undone.')) {
+        alert('Delete activity: ' + activityId);
+    }
+}
+
+function addActivity() {
+    alert('Add new activity\nThis would open a form to create a new activity.');
+}
+
+function exportActivities() {
+    alert('Export activities\nThis would download a CSV/Excel file of all activities.');
+}
+
+function refreshActivities() {
+    location.reload();
+}
+</script>
+{% endblock %}

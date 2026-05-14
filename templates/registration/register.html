@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Donation Management System</title>
+    <style>
+        /* Shared styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group label {
+            font-weight: 500;
+        }
+
+        /* Toggle eye for password fields (register) */
+        .field-with-eye {
+            position: relative;
+        }
+
+        .field-with-eye input {
+            padding-right: 2.5rem;
+        }
+
+        .field-with-eye .toggle-password {
+            position: absolute;
+            top: 50%;
+            right: 0.5rem;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Create Your Account</h1>
+            <p>Join our community. Choose your role(s) to get started.</p>
+        </div>
+
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+
+            <!-- Display Django messages -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+
+            <div class="form-group">
+                <label for="name">Full Name <span style="color:red">*</span></label>
+
+                <input type="text" name="name" id="name" required minlength="2" maxlength="100" autocomplete="name"
+                    inputmode="text" pattern="^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$" aria-describedby="nameHelp" />
+                <small id="nameHelp" style="display:block;color:#666;margin-top:6px;">
+                    Letters only, with single spaces between words (no numbers or symbols).
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address <span style="color:red">*</span></label>
+                <input type="email" name="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number <span style="color:red">*</span></label>
+                <input type="tel" name="phone" id="phone" required minlength="10">
+                <small id="phoneHelp" style="display:block;color:#666;margin-top:6px;">
+  Please enter exactly 10 digits — numbers only, no spaces or symbols.
+</small>
+            </div>
+
+            <div class="form-group">
+                <label>What would you like to do? <span style="color:red">*</span></label>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_donor" name="is_donor" value="on">
+                    <label for="is_donor">Register as a Donor</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_recipient" name="is_recipient" value="on"
+                        onclick="toggleShippingAddress()">
+                    <label for="is_recipient">Register as a Recipient</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="is_volunteer" name="is_volunteer" value="on">
+                    <label for="is_volunteer">Register as a Volunteer</label>
+                </div>
+            </div>
+
+            <div class="form-group" id="shipping_address_group" style="display: none;">
+                <label>Shipping Address (for Recipients) <span style="color:red">*</span></label>
+                <input type="text" name="address_street" id="address_street" placeholder="Street Address">
+                <label for="address_apartment">Apartment/Suite/Unit</label>
+                <input type="text" name="address_apartment" id="address_apartment"
+                    placeholder="Apartment/Suite/Unit (optional)">
+                <label for="address_city">City <span style="color:red">*</span></label>
+                <input type="text" name="address_city" id="address_city" placeholder="City">
+                <label for="address_postal_code">Postal Code <span style="color:red">*</span></label>
+                <input type="text" name="address_postal_code" id="address_postal_code" placeholder="Postal Code">
+                <label for="address_country">Country <span style="color:red">*</span></label>
+                <input type="text" name="address_country" id="address_country" placeholder="Country">
+                <label for="address_instructions">Additional Instructions</label>
+                <textarea name="address_instructions" id="address_instructions" rows="2"
+                    placeholder="Additional Instructions (optional)"></textarea>
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <div style="margin: 15px 0;">
+                    <input id="map-autocomplete" type="text" placeholder="Search address on map..."
+                        style="width:100%;padding:10px;border-radius:8px;border:1px solid #ccc;">
+                    <div id="map" style="height: 250px; width: 100%; margin-top: 10px; border-radius: 10px;"></div>
+                    <div style="margin-top: 10px; font-size: 12px; color: #666; text-align: center;">
+                        💡 Address fields and map sync automatically - no need to click anything!
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password <span style="color:red">*</span></label>
+                <div class="field-with-eye">
+                    <input type="password" name="password" id="password" required minlength="8"
+                        autocomplete="new-password">
+                    <button type="button" class="toggle-password" data-target="password" aria-label="Show password"
+                        aria-pressed="false">👁️</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password2">Confirm Password <span style="color:red">*</span></label>
+                <div class="field-with-eye">
+                    <input type="password" name="password2" id="password2" required minlength="8"
+                        autocomplete="new-password">
+                    <button type="button" class="toggle-password" data-target="password2"
+                        aria-label="Show confirm password" aria-pressed="false">👁️</button>
+                </div>
+            </div>
+
+
+            <button type="submit" class="btn">Create Account</button>
+            <p style="text-align:center;margin-top:12px">
+  <a href="{% url 'account_signup' %}">Create account with Email (allauth)</a>
+</p>
+
+
+        </form>
+
+        <div class="links">
+            <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+    </div>
+
+    <!-- Google Maps Address Integration -->
+    <script>
+        window.GOOGLE_MAPS_API_KEY = '{{ GOOGLE_MAPS_API_KEY|default:"" }}';
+    </script>
+    <script src="/static/js/google_maps_address.js"></script>
+
+    <script>
+        // ===== FULL NAME ONLY: enforce English-only validation message =====
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+            const nameInput = document.getElementById('name');
+            const NAME_RE = /^[\p{L}\p{M}]+(?: [\p{L}\p{M}]+)*$/u;
+
+            // Normalize spaces and clear any custom message while typing
+            nameInput.addEventListener('input', function () {
+                this.value = this.value.replace(/\s+/g, ' ');
+                this.setCustomValidity('');
+            });
+
+            // Supply an English-only message instead of the browser's localized one
+            nameInput.addEventListener('invalid', function () {
+                const v = (this.value || '').trim();
+                let msg = '';
+                if (!v) {
+                    msg = 'Full Name is required.';
+                } else if (v.length < 2) {
+                    msg = 'Full Name must be at least 2 characters.';
+                } else if (!NAME_RE.test(v)) {
+                    msg = 'Full Name must use letters only with single spaces between words (no numbers or symbols).';
+                }
+                this.setCustomValidity(msg);
+            });
+
+            // Keep your submit flow; show the English bubble if invalid
+            form.addEventListener('submit', function (e) {
+                const v = (nameInput.value || '').trim();
+                if (!v || v.length < 2 || !NAME_RE.test(v)) {
+                    e.preventDefault();
+                    nameInput.reportValidity(); // shows our English message
+                    nameInput.focus();
+                    return false;
+                }
+                nameInput.value = v; // normalized
+            });
+        });
+        // ===== end FULL NAME ONLY =====
+    </script>
+
+
+    <script>
+        function toggleShippingAddress() {
+            console.log('toggleShippingAddress called');
+            var checkbox = document.getElementById('is_recipient');
+            var shippingGroup = document.getElementById('shipping_address_group');
+
+            if (checkbox.checked) {
+                console.log('Showing shipping address group');
+                shippingGroup.style.display = 'block';
+                // Add required attributes when recipient is selected
+                document.getElementById('address_street').setAttribute('required', 'required');
+                document.getElementById('address_city').setAttribute('required', 'required');
+                document.getElementById('address_postal_code').setAttribute('required', 'required');
+                document.getElementById('address_country').setAttribute('required', 'required');
+                
+                // Add event listeners to address fields when they become visible
+                setTimeout(addAddressFieldListeners, 100);
+            } else {
+                console.log('Hiding shipping address group');
+                shippingGroup.style.display = 'none';
+                // Remove required attributes and clear values when recipient is not selected
+                const addressFields = ['address_street', 'address_city', 'address_postal_code', 'address_country', 'address_apartment', 'address_instructions', 'latitude', 'longitude'];
+                addressFields.forEach(field => {
+                    const input = document.getElementById(field);
+                    if (input) {
+                        input.removeAttribute('required');
+                        input.value = '';
+                    }
+                });
+            }
+        }
+
+        // Add form validation and debugging
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+
+            // Form validation
+            form.addEventListener('submit', function (e) {
+                // Check if at least one role is selected
+                const isDonor = document.getElementById('is_donor').checked;
+                const isRecipient = document.getElementById('is_recipient').checked;
+                const isVolunteer = document.getElementById('is_volunteer').checked;
+
+                if (!isDonor && !isRecipient && !isVolunteer) {
+                    e.preventDefault();
+                    alert('Please select at least one role (Donor, Recipient, or Volunteer)');
+                    return false;
+                }
+
+                // If recipient is selected, validate address fields
+                if (isRecipient) {
+                    const requiredFields = ['address_street', 'address_city', 'address_postal_code', 'address_country'];
+                    for (let field of requiredFields) {
+                        const input = document.getElementById(field);
+                        if (!input.value.trim()) {
+                            e.preventDefault();
+                            alert(`Please fill in the ${field.replace('address_', '').replace('_', ' ')} field`);
+                            input.focus();
+                            return false;
+                        }
+                    }
+                } else {
+                    // For donor-only users, clear address fields to prevent validation issues
+                    const addressFields = ['address_street', 'address_city', 'address_postal_code', 'address_country', 'address_apartment', 'address_instructions', 'latitude', 'longitude'];
+                    addressFields.forEach(field => {
+                        const input = document.getElementById(field);
+                        if (input) {
+                            input.value = '';
+                            input.removeAttribute('required');
+                        }
+                    });
+                }
+
+                // Check password confirmation
+                const password = document.getElementById('password').value;
+                const password2 = document.getElementById('password2').value;
+
+                if (password !== password2) {
+                    e.preventDefault();
+                    alert('Passwords do not match');
+                    // Validate phone number (must be exactly 10 digits, only numbers)
+const phoneInput = document.getElementById('phone');
+const phoneValue = phoneInput.value.trim();
+const phoneRegex = /^\d{10}$/;  // exactly 10 digits, only numbers
+
+if (!phoneRegex.test(phoneValue)) {
+    e.preventDefault();
+    alert('Phone number must contain exactly 10 digits (numbers only, no spaces or symbols).');
+    phoneInput.focus();
+    return false;
+}
+                    return false;
+                }
+
+                return true;
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toggle-password').forEach(function (btn) {
+                const input = document.getElementById(btn.dataset.target);
+                if (!input) return;
+                btn.addEventListener('click', function () {
+                    const showing = input.type === 'text';
+                    input.type = showing ? 'password' : 'text';
+                    btn.setAttribute('aria-pressed', (!showing).toString());
+                    btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+                    btn.setAttribute('title', showing ? 'Show password' : 'Hide password');
+                    input.focus({ preventScroll: true });
+                });
+            });
+        });
+        // === PHONE INPUT: allow only digits while typing ===
+document.addEventListener('DOMContentLoaded', function () {
+    const phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', function () {
+        this.value = this.value.replace(/\D/g, ''); // remove any non-digit
+        if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10); // limit to 10 digits
+        }
+    });
+});
+    </script>
+</body>
+
+</html>

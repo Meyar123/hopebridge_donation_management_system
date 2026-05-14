@@ -1,0 +1,170 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<style>
+#result_list th {
+    white-space: nowrap;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+}
+#result_list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+#result_list {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+.results {
+    overflow-x: visible;
+    width: 100%;
+}
+#content-main {
+    width: 100%;
+    max-width: none;
+}
+.module {
+    width: 100%;
+    max-width: none;
+}
+.button {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 2px;
+    background-color: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+    border: none;
+    cursor: pointer;
+}
+.button:hover {
+    background-color: #205067;
+    color: white;
+}
+.button[style*="color: #dc3545"] {
+    background-color: #dc3545;
+}
+.button[style*="color: #dc3545"]:hover {
+    background-color: #c82333;
+}
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="module">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Items ({{ total_count }} total)</h2>
+            <div>
+                <a href="#" class="button" onclick="addItem()">Add New Item</a>
+                <a href="#" class="button" onclick="exportItems()">Export Items</a>
+                <a href="#" class="button" onclick="refreshItems()">Refresh</a>
+            </div>
+        </div>
+        <div class="results">
+            <table id="result_list" style="width: 100%; table-layout: auto;">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Item ID</th>
+                        <th style="width: 180px;">Name</th>
+                        <th style="width: 300px;">Description</th>
+                        <th style="width: 150px;">Category</th>
+                        <th style="width: 120px;">Condition</th>
+                        <th style="width: 150px;">Donor</th>
+                        <th style="width: 180px;">Created At</th>
+                        <th style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ item.item.id }}</td>
+                        <td>{{ item.item.name }}</td>
+                        <td>{{ item.item.description|truncatechars:50 }}</td>
+                        <td>{{ item.item.category }}</td>
+                        <td>{{ item.item.condition }}</td>
+                        <td>{{ item.donor_user.username|default:"Unknown" }}</td>
+                        <td>{{ item.item.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="#" class="button" onclick="viewItem('{{ item.item.id }}')">View</a>
+                            <a href="#" class="button" onclick="editItem('{{ item.item.id }}')">Edit</a>
+                            <a href="#" class="button" onclick="viewItemImage('{{ item.item.id }}')">Image</a>
+                            <a href="#" class="button" onclick="deleteItem('{{ item.item.id }}')" style="color: #dc3545;">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8">No items found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if items.has_other_pages %}
+        <div class="paginator">
+            {% if items.has_previous %}
+                <a href="?page={{ items.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ items.number }} of {{ items.paginator.num_pages }}
+            </span>
+            
+            {% if items.has_next %}
+                <a href="?page={{ items.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewItem(itemId) {
+    alert('View item: ' + itemId + '\nThis would open a detailed view of the item.');
+}
+
+function editItem(itemId) {
+    alert('Edit item: ' + itemId + '\nThis would open an edit form for the item.');
+}
+
+function viewItemImage(itemId) {
+    alert('View item image: ' + itemId + '\nThis would show the item image in a modal or new page.');
+}
+
+function deleteItem(itemId) {
+    if (confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+        alert('Delete item: ' + itemId);
+    }
+}
+
+function addItem() {
+    alert('Add new item\nThis would open a form to create a new item.');
+}
+
+function exportItems() {
+    alert('Export items\nThis would download a CSV/Excel file of all items.');
+}
+
+function refreshItems() {
+    location.reload();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome • HopeBridge{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family:'Poppins', system-ui, sans-serif;
+    background: radial-gradient(1200px 800px at 10% -10%, #0b1226 0%, #0f172a 50%, #111827 100%);
+    color:#e2e8f0; margin:0;
+  }
+  .hero {
+    position:relative; border-radius:28px; overflow:hidden;
+    min-height:420px; aspect-ratio:16/9; max-height:620px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45); background:#000; isolation:isolate;
+    margin:20px auto; max-width:1200px;
+  }
+  .hero img {
+    position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+    filter:grayscale(100%) contrast(1.05) brightness(.82);
+  }
+  .hero-overlay {
+    position:absolute; inset:0;
+    background:linear-gradient(180deg,rgba(0,0,0,.6),rgba(0,0,0,.2) 40%,rgba(0,0,0,.7));
+    z-index:1;
+  }
+  .hero-content {
+    position:absolute; inset:0; z-index:2; display:grid; place-items:center;
+    text-align:center; padding:24px;
+  }
+  .hero h1 {
+    font-weight:800; font-size:clamp(40px,7vw,86px);
+    background:linear-gradient(90deg,#fff,#dbeafe);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 3px 14px rgba(0,0,0,.35);
+  }
+  .tag {
+    margin-top:12px; font-weight:600; font-size:clamp(16px,2.5vw,28px);
+    color:#e5e7eb;
+  }
+  .cta {margin-top:24px; display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+  .btn {
+    padding:12px 22px; border-radius:12px; font-weight:700;
+    text-decoration:none; transition:.25s ease;
+  }
+  .btn-primary {background:linear-gradient(90deg,#22d3ee,#a78bfa); color:#041018;}
+  .btn-secondary {background:#ffffff22; color:#e2e8f0; border:1px solid #ffffff44;}
+  .btn:hover {transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.35);}
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <img src="{% static 'images/hero-hands.png' %}" alt="HopeBridge hands">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>HopeBridge</h1>
+    <div class="tag">Connecting hearts, building hope</div>
+    <div class="cta">
+      <a href="{% url 'login' %}" class="btn btn-primary">Sign In</a>
+      <a href="{% url 'register' %}" class="btn btn-secondary">Sign Up</a>
+      <a href="{% url 'about' %}" class="btn btn-secondary">About Us</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

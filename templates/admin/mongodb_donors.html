@@ -1,0 +1,166 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<style>
+#result_list th {
+    white-space: nowrap;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+}
+#result_list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+#result_list {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+.results {
+    overflow-x: visible;
+    width: 100%;
+}
+#content-main {
+    width: 100%;
+    max-width: none;
+}
+.module {
+    width: 100%;
+    max-width: none;
+}
+.button {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 2px;
+    background-color: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+    border: none;
+    cursor: pointer;
+}
+.button:hover {
+    background-color: #205067;
+    color: white;
+}
+.button[style*="color: #dc3545"] {
+    background-color: #dc3545;
+}
+.button[style*="color: #dc3545"]:hover {
+    background-color: #c82333;
+}
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="module">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Donors ({{ total_count }} total)</h2>
+            <div>
+                <a href="#" class="button" onclick="addDonor()">Add New Donor</a>
+                <a href="#" class="button" onclick="exportDonors()">Export Donors</a>
+                <a href="#" class="button" onclick="refreshDonors()">Refresh</a>
+            </div>
+        </div>
+        <div class="results">
+            <table id="result_list" style="width: 100%; table-layout: auto;">
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Donor ID</th>
+                        <th style="width: 150px;">Username</th>
+                        <th style="width: 250px;">Email</th>
+                        <th style="width: 150px;">Phone</th>
+                        <th style="width: 180px;">Created At</th>
+                        <th style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in donors %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ item.donor.id }}</td>
+                        <td>{{ item.user.username }}</td>
+                        <td>{{ item.user.email }}</td>
+                        <td>{{ item.donor.phone }}</td>
+                        <td>{{ item.donor.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="#" class="button" onclick="viewDonor('{{ item.donor.id }}')">View</a>
+                            <a href="#" class="button" onclick="editDonor('{{ item.donor.id }}')">Edit</a>
+                            <a href="#" class="button" onclick="viewDonorItems('{{ item.donor.id }}')">Items</a>
+                            <a href="#" class="button" onclick="deleteDonor('{{ item.donor.id }}')" style="color: #dc3545;">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No donors found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if donors.has_other_pages %}
+        <div class="paginator">
+            {% if donors.has_previous %}
+                <a href="?page={{ donors.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ donors.number }} of {{ donors.paginator.num_pages }}
+            </span>
+            
+            {% if donors.has_next %}
+                <a href="?page={{ donors.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewDonor(donorId) {
+    alert('View donor: ' + donorId + '\nThis would open a detailed view of the donor.');
+}
+
+function editDonor(donorId) {
+    alert('Edit donor: ' + donorId + '\nThis would open an edit form for the donor.');
+}
+
+function viewDonorItems(donorId) {
+    alert('View donor items: ' + donorId + '\nThis would show all items donated by this donor.');
+}
+
+function deleteDonor(donorId) {
+    if (confirm('Are you sure you want to delete this donor? This action cannot be undone.')) {
+        alert('Delete donor: ' + donorId);
+    }
+}
+
+function addDonor() {
+    alert('Add new donor\nThis would open a form to create a new donor.');
+}
+
+function exportDonors() {
+    alert('Export donors\nThis would download a CSV/Excel file of all donors.');
+}
+
+function refreshDonors() {
+    location.reload();
+}
+</script>
+{% endblock %}

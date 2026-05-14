@@ -1,0 +1,9 @@
+Hello {{ recipient.name }},
+
+You successfully claimed the item "{{ item.name }}" from {{ donor.name }}.
+Donor contact: {{ donor.email }}
+
+Please contact the donor to arrange pickup or delivery.
+
+Thank you for using HopeBridge,
+HopeBridge Team

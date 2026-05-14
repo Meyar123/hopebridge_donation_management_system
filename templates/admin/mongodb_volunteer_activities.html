@@ -1,0 +1,171 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}">
+<style>
+#result_list th {
+    white-space: nowrap;
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ddd;
+}
+#result_list td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+#result_list {
+    border-collapse: collapse;
+    min-width: 100%;
+}
+.results {
+    overflow-x: visible;
+    width: 100%;
+}
+#content-main {
+    width: 100%;
+    max-width: none;
+}
+.module {
+    width: 100%;
+    max-width: none;
+}
+.button {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 2px;
+    background-color: #417690;
+    color: white;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: 11px;
+    border: none;
+    cursor: pointer;
+}
+.button:hover {
+    background-color: #205067;
+    color: white;
+}
+.button[style*="color: #dc3545"] {
+    background-color: #dc3545;
+}
+.button[style*="color: #dc3545"]:hover {
+    background-color: #c82333;
+}
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+    
+    <div class="module">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>Volunteer Activities ({{ total_count }} total)</h2>
+            <div>
+                <a href="#" class="button" onclick="addVolunteerActivity()">Add New Participation</a>
+                <a href="#" class="button" onclick="exportVolunteerActivities()">Export Data</a>
+                <a href="#" class="button" onclick="refreshVolunteerActivities()">Refresh</a>
+            </div>
+        </div>
+        <div class="results">
+            <table id="result_list" style="width: 100%; table-layout: auto;">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">VA ID</th>
+                        <th style="width: 200px;">Activity</th>
+                        <th style="width: 150px;">Volunteer</th>
+                        <th style="width: 150px;">Participant</th>
+                        <th style="width: 120px;">Status</th>
+                        <th style="width: 180px;">Created At</th>
+                        <th style="width: 200px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in volunteer_activities %}
+                    <tr class="{% cycle 'row1' 'row2' %}">
+                        <td>{{ item.volunteer_activity.id }}</td>
+                        <td>{{ item.activity.title|default:"Unknown" }}</td>
+                        <td>{{ item.volunteer_user.username|default:"Unknown" }}</td>
+                        <td>{{ item.participant.username|default:"None" }}</td>
+                        <td>{{ item.volunteer_activity.status }}</td>
+                        <td>{{ item.volunteer_activity.created_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="#" class="button" onclick="viewVolunteerActivity('{{ item.volunteer_activity.id }}')">View</a>
+                            <a href="#" class="button" onclick="editVolunteerActivity('{{ item.volunteer_activity.id }}')">Edit</a>
+                            <a href="#" class="button" onclick="updateVolunteerActivityStatus('{{ item.volunteer_activity.id }}', '{{ item.volunteer_activity.status }}')">Update Status</a>
+                            <a href="#" class="button" onclick="deleteVolunteerActivity('{{ item.volunteer_activity.id }}')" style="color: #dc3545;">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">No volunteer activities found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if volunteer_activities.has_other_pages %}
+        <div class="paginator">
+            {% if volunteer_activities.has_previous %}
+                <a href="?page={{ volunteer_activities.previous_page_number }}">&laquo; Previous</a>
+            {% endif %}
+            
+            <span class="current">
+                Page {{ volunteer_activities.number }} of {{ volunteer_activities.paginator.num_pages }}
+            </span>
+            
+            {% if volunteer_activities.has_next %}
+                <a href="?page={{ volunteer_activities.next_page_number }}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function viewVolunteerActivity(vaId) {
+    alert('View volunteer activity: ' + vaId + '\nThis would open a detailed view of the participation record.');
+}
+
+function editVolunteerActivity(vaId) {
+    alert('Edit volunteer activity: ' + vaId + '\nThis would open an edit form for the participation record.');
+}
+
+function updateVolunteerActivityStatus(vaId, currentStatus) {
+    const newStatus = prompt('Update participation status for ID: ' + vaId + '\nCurrent status: ' + currentStatus + '\nEnter new status:', currentStatus);
+    if (newStatus && newStatus !== currentStatus) {
+        alert('Update participation status to: ' + newStatus);
+    }
+}
+
+function deleteVolunteerActivity(vaId) {
+    if (confirm('Are you sure you want to delete this participation record? This action cannot be undone.')) {
+        alert('Delete volunteer activity: ' + vaId);
+    }
+}
+
+function addVolunteerActivity() {
+    alert('Add new participation\nThis would open a form to create a new volunteer activity participation.');
+}
+
+function exportVolunteerActivities() {
+    alert('Export volunteer activities\nThis would download a CSV/Excel file of all participation records.');
+}
+
+function refreshVolunteerActivities() {
+    location.reload();
+}
+</script>
+{% endblock %}

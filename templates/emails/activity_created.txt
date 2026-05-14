@@ -1,0 +1,8 @@
+Hello {{ volunteer.name }},
+
+Your activity "{{ activity.title }}" has been created successfully.
+Location: {{ activity.location }}
+Date: {{ activity.activity_date }}
+
+Thank you for contributing to your community,
+HopeBridge Team

@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Activities - Donation Management System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        
+        .nav { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav a { color: #28a745; text-decoration: none; margin-right: 20px; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .filters { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filters h3 { color: #28a745; margin-bottom: 15px; }
+        .filter-row { display: flex; gap: 15px; flex-wrap: wrap; align-items: end; }
+        .filter-group { flex: 1; min-width: 200px; }
+        .filter-group label { display: block; margin-bottom: 5px; color: #333; font-weight: 500; }
+        .filter-group select, .filter-group input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { opacity: 0.9; }
+        
+        .activities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .activity-card { background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); overflow: hidden; }
+        .activity-image { width: 100%; height: 200px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; color: #666; }
+        .activity-content { padding: 20px; }
+        .activity-title { font-size: 1.2rem; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .activity-meta { color: #666; font-size: 0.9rem; margin-bottom: 10px; }
+        .activity-description { color: #555; margin-bottom: 15px; line-height: 1.5; }
+        .activity-footer { display: flex; justify-content: space-between; align-items: center; }
+        .activity-stats { color: #666; font-size: 0.9rem; }
+        .join-btn { background: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; }
+        .join-btn:hover { background: #218838; }
+        .join-btn:disabled { background: #6c757d; cursor: not-allowed; opacity: 0.6; }
+        
+        .category-badge { display: inline-block; background: #e9ecef; color: #495057; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; margin-right: 5px; }
+        .location-badge { display: inline-block; background: #d1ecf1; color: #0c5460; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: #666; }
+        .empty-state img { width: 100px; opacity: 0.5; margin-bottom: 20px; }
+        
+        .pagination { text-align: center; margin-top: 30px; }
+        .pagination a { display: inline-block; padding: 8px 16px; margin: 0 5px; background: white; color: #28a745; text-decoration: none; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .pagination a:hover { background: #28a745; color: white; }
+        .pagination .current { background: #28a745; color: white; }
+        
+        @media (max-width: 768px) {
+            .filter-row { flex-direction: column; }
+            .activities-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Volunteer Activities</h1>
+        <p>Discover opportunities to make a difference in your community</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div style="background: #f8f9fa; padding: 15px 20px; border-left: 4px solid #28a745;">
+            {% for message in messages %}
+                <div style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 12px; margin-bottom: 10px; font-weight: 500;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="nav">
+        <a href="{% url 'activity_list' %}">All Activities</a>
+        {% if user.is_authenticated %}
+            {% if user.volunteer_profile %}
+                <a href="{% url 'volunteer_dashboard' %}">My Dashboard</a>
+                <a href="{% url 'create_activity' %}">Create Activity</a>
+            {% endif %}
+        {% endif %}
+        <a href="{% url 'profile_redirect' %}">Profile</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="container">
+        <!-- Filters -->
+        <div class="filters">
+            <h3>Filter Activities</h3>
+            <form method="get">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category }}" {% if current_category == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="location">Location</label>
+                        <select id="location" name="location">
+                            <option value="">All Locations</option>
+                            {% for location in locations %}
+                                <option value="{{ location }}" {% if current_location == location %}selected{% endif %}>{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="search">Search</label>
+                        <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Search activities...">
+                    </div>
+                    <div class="filter-group">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'activity_list' %}" class="btn btn-secondary">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Activities Grid -->
+        {% if activities %}
+            <div class="activities-grid">
+                {% for activity in activities %}
+                    <div class="activity-card">
+                        <div class="activity-image">
+                            {% if activity.image %}
+                                <img src="{{ activity.image.url }}" alt="{{ activity.title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <span>📅</span>
+                            {% endif %}
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ activity.title }}</div>
+                            <div class="activity-meta">
+                                <span class="category-badge">{{ activity.category }}</span>
+                                <span class="location-badge">📍 {{ activity.location }}</span>
+                                {% if activity.latitude and activity.longitude %}
+                                    <a href="https://www.google.com/maps/search/?api=1&query={{ activity.latitude }},{{ activity.longitude }}" target="_blank" class="location-badge" style="background: #28a745; color: white; text-decoration: none;">🗺️ View on Map</a>
+                                {% endif %}
+                            </div>
+                            <div class="activity-description">{{ activity.description|truncatewords:25 }}</div>
+                            <div class="activity-footer">
+                                <div class="activity-stats">
+                                    <div>📅 {{ activity.activity_date|date:"M d, Y" }}</div>
+                                    <div>⏱️ {{ activity.duration_hours }} hour{{ activity.duration_hours|pluralize }}</div>
+                                    <div>👥 {{ activity.joined_participants }}/{{ activity.max_participants }} participants</div>
+                                </div>
+                                {% if user.is_authenticated and user.volunteer_profile %}
+                                    {% if activity.status == 'completed' %}
+                                        {% if activity.user_has_joined %}
+                                            <form method="post" action="{% url 'leave_activity' activity.id %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="join-btn" style="background: #dc3545;">Leave Activity</button>
+                                            </form>
+                                        {% else %}
+                                            <button class="join-btn" disabled style="background: #6c757d; cursor: not-allowed;">Activity Full</button>
+                                        {% endif %}
+                                    {% elif activity.user_has_joined %}
+                                        <form method="post" action="{% url 'leave_activity' activity.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="join-btn" style="background: #dc3545;">Leave Activity</button>
+                                        </form>
+                                    {% else %}
+                                        <form method="post" action="{% url 'join_activity' activity.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="join-btn">Join Activity</button>
+                                        </form>
+                                    {% endif %}
+                                {% elif user.is_authenticated %}
+                                    <div style="color: #666; font-size: 0.9rem; font-style: italic;">
+                                        Only volunteers can join activities
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🤝</div>
+                <h3>No Activities Found</h3>
+                <p>There are no volunteer activities available at the moment.</p>
+                {% if user.is_authenticated and user.volunteer_profile %}
+                    <a href="{% url 'create_activity' %}" class="btn btn-primary" style="margin-top: 15px;">Create the First Activity</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

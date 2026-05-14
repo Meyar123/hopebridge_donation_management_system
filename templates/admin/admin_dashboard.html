@@ -1,0 +1,435 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Donation Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        
+        .nav { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav a { color: #667eea; text-decoration: none; margin-right: 20px; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .stat-card h3 { color: #667eea; margin-bottom: 10px; }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #333; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        
+        .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .content-card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .content-card h3 { color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        
+        .activity-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-time { color: #999; font-size: 0.8rem; }
+        .activity-text { margin-top: 5px; }
+        
+        .filter-controls { background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .filter-controls select, .filter-controls input { padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px; }
+        .filter-controls button { padding: 8px 15px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        
+        .top-list { list-style: none; }
+        .top-list li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+        .top-list li:last-child { border-bottom: none; }
+        .top-count { float: right; color: #667eea; font-weight: bold; }
+        
+        .category-stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .category-stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; }
+        .category-stat-card h4 { color: #333; margin-bottom: 10px; font-size: 1.1rem; }
+        .category-numbers { display: flex; flex-direction: column; gap: 5px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        .stat-value { font-weight: bold; font-size: 1rem; }
+        .stat-value.available { color: #28a745; }
+        .stat-value.claimed { color: #ffc107; }
+        .stat-value.shipped { color: #17a2b8; }
+        
+        .donations-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .donations-table th, .donations-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .donations-table th { background: #f8f9fa; font-weight: 600; color: #333; }
+        .donations-table tr:hover { background: #f5f5f5; }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .status-available { background: #d4edda; color: #155724; }
+        .status-claimed { background: #fff3cd; color: #856404; }
+        .status-shipped { background: #d1ecf1; color: #0c5460; }
+        .status-unavailable { background: #f8d7da; color: #721c24; }
+        
+        /* Chart Styles */
+        .chart-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .chart-container h3 { color: #667eea; margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .chart-wrapper { position: relative; height: 300px; margin-bottom: 20px; }
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .chart-full { grid-column: 1 / -1; }
+        .chart-half { grid-column: span 1; }
+        
+        @media (max-width: 768px) {
+            .chart-grid { grid-template-columns: 1fr; }
+            .chart-half { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 Admin Dashboard</h1>
+        <p>Comprehensive overview of the Donation Management System</p>
+    </div>
+    
+    <div class="nav">
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_user_management' %}">User Management</a>
+        <a href="{% url 'admin_donation_management' %}">Donation Management</a>
+        <a href="{% url 'admin_activity_management' %}">Activity Management</a>
+        <a href="{% url 'admin_activity_logs' %}">Activity Logs</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+    
+    <div class="container">
+        <div class="filter-controls">
+            <form method="get">
+                <label>Time Period:</label>
+                <select name="days">
+                    <option value="7" {% if days == 7 %}selected{% endif %}>Last 7 days</option>
+                    <option value="30" {% if days == 30 %}selected{% endif %}>Last 30 days</option>
+                    <option value="90" {% if days == 90 %}selected{% endif %}>Last 90 days</option>
+                </select>
+                <button type="submit">Update</button>
+            </form>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>👥 Users</h3>
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Active Users</h3>
+                <div class="stat-number">{{ active_users }}</div>
+                <div class="stat-label">Currently Active</div>
+            </div>
+            <div class="stat-card">
+                <h3>🚫 Blocked Users</h3>
+                <div class="stat-number">{{ blocked_users }}</div>
+                <div class="stat-label">Currently Blocked</div>
+            </div>
+            <div class="stat-card">
+                <h3>🆕 New Users</h3>
+                <div class="stat-number">{{ new_users_period }}</div>
+                <div class="stat-label">New in {{ days }} days</div>
+            </div>
+            <div class="stat-card">
+                <h3>🎁 Total Donations</h3>
+                <div class="stat-number">{{ total_donations }}</div>
+                <div class="stat-label">All Time</div>
+            </div>
+            <div class="stat-card">
+                <h3>📦 Available</h3>
+                <div class="stat-number">{{ available_donations }}</div>
+                <div class="stat-label">Currently Available</div>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Claimed</h3>
+                <div class="stat-number">{{ claimed_donations }}</div>
+                <div class="stat-label">Currently Claimed</div>
+            </div>
+            <div class="stat-card">
+                <h3>🚚 Shipped</h3>
+                <div class="stat-number">{{ shipped_donations }}</div>
+                <div class="stat-label">Successfully Shipped</div>
+            </div>
+            <div class="stat-card">
+                <h3>🚫 Unavailable</h3>
+                <div class="stat-number">{{ unavailable_donations }}</div>
+                <div class="stat-label">Currently Unavailable</div>
+            </div>
+            <div class="stat-card">
+                <h3>🤝 Total Activities</h3>
+                <div class="stat-number">{{ total_activities }}</div>
+                <div class="stat-label">All Time</div>
+            </div>
+            <div class="stat-card">
+                <h3>📅 Available Activities</h3>
+                <div class="stat-number">{{ available_activities }}</div>
+                <div class="stat-label">Currently Open</div>
+            </div>
+            <div class="stat-card">
+                <h3>👥 Joined Activities</h3>
+                <div class="stat-number">{{ joined_activities }}</div>
+                <div class="stat-label">Currently Joined</div>
+            </div>
+            <div class="stat-card">
+                <h3>✅ Completed Activities</h3>
+                <div class="stat-number">{{ completed_activities }}</div>
+                <div class="stat-label">Successfully Completed</div>
+            </div>
+            <div class="stat-card">
+                <h3>❌ Cancelled Activities</h3>
+                <div class="stat-number">{{ cancelled_activities }}</div>
+                <div class="stat-label">Currently Cancelled</div>
+            </div>
+        </div>
+        
+        <!-- Charts Section -->
+        <div class="chart-grid">
+            <!-- Donation Status Pie Chart -->
+            <div class="chart-container chart-half">
+                <h3>📊 Donation Status Distribution</h3>
+                <div class="chart-wrapper">
+                    <canvas id="donationStatusChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- User Activity Chart -->
+            <div class="chart-container chart-half">
+                <h3>👥 User Activity (Last 30 Days)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="userActivityChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Donations by Category Chart -->
+            <div class="chart-container chart-full">
+                <h3>📈 Donations by Category</h3>
+                <div class="chart-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Monthly Trends Chart -->
+            <div class="chart-container chart-full">
+                <h3>📅 Monthly Trends</h3>
+                <div class="chart-wrapper">
+                    <canvas id="monthlyTrendsChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Volunteer Activity Status Chart -->
+            <div class="chart-container chart-half">
+                <h3>🤝 Volunteer Activity Status</h3>
+                <div class="chart-wrapper">
+                    <canvas id="volunteerActivityStatusChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Volunteer Activity Trends Chart -->
+            <div class="chart-container chart-half">
+                <h3>📈 Volunteer Activity Trends (30 Days)</h3>
+                <div class="chart-wrapper">
+                    <canvas id="volunteerActivityTrendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="content-card">
+                <h3>📊 Recent Donations</h3>
+                {% for donation in recent_donations %}
+                <div class="activity-item">
+                    <div class="activity-time">{{ donation.created_at|date:"M d, Y H:i" }}</div>
+                    <div class="activity-text">
+                        <strong>{{ donation.item.name }}</strong> ({{ donation.item.category }}) donated by {{ donation.donor_name }}
+                        {% if donation.recipient_name %}
+                            → claimed by {{ donation.recipient_name }}
+                        {% endif %}
+                        <span style="color: #667eea;">({{ donation.status }})</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No recent donations</p>
+                {% endfor %}
+            </div>
+            
+            <div class="content-card">
+                <h3>👤 Recent Users</h3>
+                {% for user in recent_users %}
+                <div class="activity-item">
+                    <div class="activity-time">{{ user.date_joined|date:"M d, Y H:i" }}</div>
+                    <div class="activity-text">
+                        <strong>{{ user.name }}</strong> ({{ user.email }})
+                        <span style="color: #667eea;">{% if user.is_active %}Active{% else %}Blocked{% endif %}</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No recent users</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Category Statistics Section -->
+        <div class="content-card" style="margin-bottom: 20px;">
+            <h3>📈 Donations by Category</h3>
+            <div class="category-stats-grid">
+                {% for stat in donation_category_stats %}
+                <div class="category-stat-card">
+                    <h4>{{ stat.item__category|default:"Unknown" }}</h4>
+                    <div class="category-numbers">
+                        <div class="stat-row">
+                            <span class="stat-label">Total:</span>
+                            <span class="stat-value">{{ stat.total_count }}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Available:</span>
+                            <span class="stat-value available">{{ stat.available_count }}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Claimed:</span>
+                            <span class="stat-value claimed">{{ stat.claimed_count }}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Shipped:</span>
+                            <span class="stat-value shipped">{{ stat.shipped_count }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No donations by category yet</p>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="content-grid">
+            <div class="content-card">
+                <h3>🏆 Top Donors</h3>
+                <ul class="top-list">
+                    {% for donor in top_donors %}
+                    <li>
+                        {{ donor.user.name }}
+                        <span class="top-count">{{ donor.donation_count }} donations</span>
+                    </li>
+                    {% empty %}
+                    <li>No donors yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="content-card">
+                <h3>🏆 Top Recipients</h3>
+                <ul class="top-list">
+                    {% for recipient in top_recipients %}
+                    <li>
+                        {{ recipient.user.name }}
+                        <span class="top-count">{{ recipient.claimed_count }} claimed</span>
+                    </li>
+                    {% empty %}
+                    <li>No recipients yet</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        
+        <!-- All Donations Table -->
+        <div class="content-card">
+            <h3>📋 All Donations</h3>
+            <div style="overflow-x: auto;">
+                <table class="donations-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Category</th>
+                            <th>Donor</th>
+                            <th>Recipient</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Days Old</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in all_donations %}
+                        <tr>
+                            <td>
+                                <strong>{{ donation.item.name }}</strong>
+                                {% if donation.item.image %}
+                                    <br><small style="color: #666;">📷 Has Image</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ donation.item.category }}</td>
+                            <td>{{ donation.donor_name }}</td>
+                            <td>
+                                {% if donation.recipient_name %}
+                                    {{ donation.recipient_name }}
+                                {% else %}
+                                    <span style="color: #999;">Not claimed</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ donation.status }}">
+                                    {{ donation.status|title }}
+                                </span>
+                            </td>
+                            <td>{{ donation.created_at|date:"M d, Y" }}</td>
+                            <td>{{ donation.created_at|timesince }}</td>
+                            <td>
+                                <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                                    {% if donation.status == 'claimed' %}
+                                        <form method="post" action="{% url 'admin_ship_donation' donation.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" 
+                                                    style="background: #17a2b8; color: white; padding: 4px 8px; border-radius: 4px; border: none; font-size: 0.8rem; white-space: nowrap; cursor: pointer;"
+                                                    onclick="return confirm('Mark this donation as shipped?')">
+                                                🚚 Ship
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    
+                                    <!-- Delete Donation Form -->
+                                    <form method="post" action="{% url 'admin_delete_donation' donation.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; border: none; font-size: 0.8rem; white-space: nowrap; cursor: pointer;"
+                                                onclick="return confirm('Are you sure you want to delete this donation? This action cannot be undone.')">
+                                            🗑️ Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #999; padding: 20px;">
+                                No donations found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pass data to JavaScript -->
+    {{ donation_category_stats|json_script:"category-stats-data" }}
+    {{ volunteer_activity_trends|json_script:"volunteer-activity-trends-data" }}
+    {{ volunteer_activity_status|json_script:"volunteer-activity-status-data" }}
+    
+    <script>
+        window.adminChartData = {
+            available_donations: parseInt('{{ available_donations|default:0 }}') || 0,
+            claimed_donations: parseInt('{{ claimed_donations|default:0 }}') || 0,
+            shipped_donations: parseInt('{{ shipped_donations|default:0 }}') || 0,
+            unavailable_donations: parseInt('{{ unavailable_donations|default:0 }}') || 0,
+            new_users_period: parseInt('{{ new_users_period|default:0 }}') || 0,
+            new_donations_period: parseInt('{{ new_donations_period|default:0 }}') || 0,
+            total_donations: parseInt('{{ total_donations|default:0 }}') || 0,
+            total_users: parseInt('{{ total_users|default:0 }}') || 0,
+            category_stats: JSON.parse(document.getElementById('category-stats-data')?.textContent || '[]'),
+            volunteer_activity_trends: JSON.parse(document.getElementById('volunteer-activity-trends-data')?.textContent || '[]'),
+            volunteer_activity_status: JSON.parse(document.getElementById('volunteer-activity-status-data')?.textContent || '{}')
+        };
+    </script>
+    
+    <!-- Load external JavaScript file -->
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+</body>
+</html> 

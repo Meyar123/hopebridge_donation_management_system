@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Logs - Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
+        
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; }
+        .header h1 { font-size: 2rem; margin-bottom: 10px; }
+        
+        .nav { background: white; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .nav a { color: #667eea; text-decoration: none; margin-right: 20px; font-weight: 500; }
+        .nav a:hover { text-decoration: underline; }
+        .nav a.active { color: #333; font-weight: bold; }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        .logs-table { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .logs-table table { width: 100%; border-collapse: collapse; }
+        .logs-table th, .logs-table td { padding: 12px; text-align: left; border-bottom: 1px solid #f0f0f0; }
+        .logs-table th { background: #f8f9fa; font-weight: 600; color: #333; }
+        .logs-table tr:hover { background: #f8f9fa; }
+        
+        .log-type { padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .log-donation { background: #d4edda; color: #155724; }
+        .log-activity { background: #d1ecf1; color: #0c5460; }
+        .log-user { background: #fff3cd; color: #856404; }
+        
+        .timestamp { color: #666; font-size: 0.9rem; }
+        .description { margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Activity Logs</h1>
+        <p>Monitor system activity and user actions</p>
+    </div>
+    
+    <div class="nav">
+        <a href="{% url 'admin_dashboard' %}">Dashboard</a>
+        <a href="{% url 'admin_user_management' %}">User Management</a>
+        <a href="{% url 'admin_donation_management' %}">Donation Management</a>
+        <a href="{% url 'admin_activity_management' %}">Activity Management</a>
+        <a href="{% url 'admin_activity_logs' %}" class="active">Activity Logs</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+    
+    <div class="container">
+        <div class="logs-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>User</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr>
+                        <td>
+                            <span class="log-type log-{{ activity.type }}">
+                                {{ activity.type|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>{{ activity.action }}</strong>
+                        </td>
+                        <td>
+                            <div class="description">{{ activity.description }}</div>
+                        </td>
+                        <td>{{ activity.user }}</td>
+                        <td>
+                            <div class="timestamp">{{ activity.timestamp|date:"M d, Y H:i" }}</div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px; color: #666;">
+                            No activity logs found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if activities %}
+        <div style="margin-top: 20px; text-align: center; color: #666;">
+            Showing {{ activities|length }} log entr{{ activities|length|pluralize:"y,ies" }}
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

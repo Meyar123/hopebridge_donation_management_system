@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}No Roles Assigned{% endblock %}
+
+{% block content %}
+<div class="no-roles-hero">
+  <div class="no-roles-card">
+    <h1>No Role Assigned</h1>
+   <p class="no-roles-text">
+  You haven’t selected any role yet. Please choose how you’d like to participate:
+</p>
+
+
+    <div class="no-roles-actions">
+      <a class="btn btn-donor" href="{% url 'become_donor' %}">Become a Donor</a>
+      <a class="btn btn-recipient" href="{% url 'become_recipient' %}">Become a Recipient</a>
+      <a class="btn btn-volunteer" href="{% url 'become_volunteer' %}">Become a Volunteer</a>
+    </div>
+
+
+
+    <p class="no-roles-help">
+        Or <a href="{% url 'contact_admin' %}">contact the administrator</a> for assistance.
+    </p>
+  </div>
+</div>
+
+<style>
+  :root{
+    --indigo:#667eea;
+    --purple:#764ba2;
+    --pink:#f093fb;
+    --coral:#f5576c;
+    --green:#28a745;
+    --teal:#20c997;
+  }
+
+  /* Background section to mimic the selection page */
+  .no-roles-hero{
+    min-height: calc(100vh - 120px);   /* leaves space for navbar/footer */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:32px 16px;
+    background: linear-gradient(135deg, var(--indigo) 0%, var(--purple) 100%);
+  }
+
+  /* Center card */
+  .no-roles-card{
+    background:#fff;
+    max-width:680px;
+    width:100%;
+    border-radius:20px;
+    padding:40px 36px;
+    text-align:center;
+    box-shadow:0 20px 40px rgba(0,0,0,.12);
+  }
+
+  .no-roles-card h1{
+    color:var(--indigo);
+    font-size:2rem;
+    margin:0 0 12px;
+    letter-spacing:.2px;
+  }
+
+  .no-roles-card p{
+    color:#666;
+    font-size:1.05rem;
+    margin:0 0 24px;
+  }
+
+  .no-roles-text {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #444;
+    margin-bottom: 30px;
+    }
+
+  .no-roles-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    justify-content:center;
+    margin-bottom:30px;
+  }
+
+  /* Fancy pill buttons */
+  .btn{
+    display:inline-block;
+    padding:14px 28px;
+    border-radius:28px;
+    text-decoration:none;
+    font-weight:700;
+    font-size:1rem;
+    color:#fff;
+    box-shadow:0 8px 20px rgba(0,0,0,.12);
+    transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  }
+  .btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 28px rgba(0,0,0,.18);
+    filter:brightness(1.03);
+  }
+  .btn:active{
+    transform:translateY(0);
+    box-shadow:0 6px 14px rgba(0,0,0,.14);
+  }
+
+  /* Colors to match selection page */
+  .btn-donor{
+    background:linear-gradient(45deg, var(--indigo), var(--purple));
+  }
+  .btn-recipient{
+    background:linear-gradient(45deg, var(--pink), var(--coral));
+  }
+  .btn-volunteer{
+    background:linear-gradient(45deg, var(--green), var(--teal));
+  }
+
+
+  .no-roles-help a{
+    color:var(--indigo);
+    text-decoration:none;
+    font-weight:600;
+  }
+  .no-roles-help a:hover{ text-decoration:underline; }
+
+  @media (max-width:480px){
+    .no-roles-card{ padding:28px 22px; }
+    .no-roles-card h1{ font-size:1.6rem; }
+    .btn{ width:100%; }
+  }
+</style>
+{% endblock %}

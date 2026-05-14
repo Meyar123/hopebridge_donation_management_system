@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Contact Admin{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root{
+    --bg:#0b1226;            /* צבע מותג כהה שכבר יש לך בהדר */
+    --ink:#0f172a;           /* טקסט ראשי */
+    --muted:#64748b;         /* טקסט משני */
+    --ring:#7c3aed;          /* סגול עדין לפוקוס/כפתור */
+    --ring-2:#6366f1;        /* גוון משלים לגרדיאנט */
+    --surface:#fff;          /* רקע כרטיס */
+    --line:#e5e7eb;          /* קו עדין */
+    --radius:14px;
+  }
+
+  /* מסגרת כללית של העמוד */
+  .page-wrap{max-width:980px;margin:36px auto;padding:0 20px}
+
+  /* כותרת */
+  .h-title{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto;
+    font-weight:800; letter-spacing:.2px;
+    color:var(--ink); font-size:40px; margin:4px 0 22px;
+  }
+
+  /* כרטיס הטופס */
+  .card{
+    background:var(--surface); border:1px solid #eef2f7;
+    border-radius:calc(var(--radius) + 4px);
+    box-shadow:0 8px 32px rgba(15,23,42,.08);
+    padding:26px 26px 20px;
+  }
+
+  /* גריד רספונסיבי: שתי עמודות בשורה הראשונה, אח"כ שורה-שורה */
+  .grid{display:grid; gap:14px}
+  .grid-2{grid-template-columns:1fr 1fr}
+  @media (max-width: 760px){ .grid-2{grid-template-columns:1fr} }
+
+  /* שדה */
+  .field{display:flex; flex-direction:column; gap:8px}
+  .label{
+    font:600 14px/1.15 system-ui,-apple-system,Segoe UI,Roboto;
+    color:var(--ink);
+  }
+  .hint{font:500 12px/1.2 system-ui,-apple-system,Segoe UI,Roboto; color:var(--muted); margin-inline-start:8px}
+
+  .control{
+    width:100%; border:1px solid var(--line); background:var(--surface);
+    border-radius:12px; padding:14px 16px; font-size:15px;
+    color:var(--ink); outline:none; transition:.15s border-color, .15s box-shadow;
+  }
+  .control::placeholder{color:#9aa3b2}
+  .control:focus{
+    border-color:var(--ring);
+    box-shadow:0 0 0 4px color-mix(in srgb, var(--ring) 20%, transparent);
+  }
+  textarea.control{min-height:220px; resize:vertical}
+
+  /* הערת SLA */
+  .note{
+    margin-top:6px; color:var(--muted); font:500 13px/1.35 system-ui,-apple-system,Segoe UI,Roboto;
+  }
+
+  /* כפתור שליחה */
+  .actions{margin-top:14px}
+  .btn{
+    display:inline-flex; justify-content:center; align-items:center; gap:10px;
+    width:100%; padding:14px 18px; border-radius:14px; border:0; cursor:pointer;
+    color:#fff; font:700 16px/1 system-ui,-apple-system,Segoe UI,Roboto;
+    background:linear-gradient(90deg, var(--ring), var(--ring-2));
+    box-shadow:0 8px 24px color-mix(in srgb, var(--ring) 35%, transparent);
+    transition:.15s transform,.15s box-shadow,.15s opacity;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.65; cursor:not-allowed}
+
+  /* הודעות flash של Django (מותאם למה שהוספת ב-base) */
+  .flash-wrap{margin:0 0 14px}
+  .alert{
+    border-radius:12px; padding:12px 14px; border:1px solid #d9fbe5; background:#ecfdf5;
+    color:#065f46; font:600 14px/1.25 system-ui,-apple-system,Segoe UI,Roboto;
+  }
+  .alert.error{background:#fef2f2; border-color:#fecaca; color:#991b1b}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrap">
+  <h1 class="h-title">Contact Admin</h1>
+
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="post" class="card">
+    {% csrf_token %}
+
+    <div class="grid grid-2">
+      <div class="field">
+        <label class="label">Your Name <span class="hint">(optional)</span></label>
+        <input class="control" type="text" name="name" value="{{ prefill_name|default:'' }}" placeholder="e.g., Renad Saad">
+      </div>
+
+      <div class="field">
+       <label class="label">Your Email <span class="hint">*</span> (required, for reply)</label>
+        <input class="control" type="email" name="email" value="{{ prefill_email|default:'' }}" placeholder="you@example.com" required>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:6px">
+      <label class="label">Subject <span class="hint">*</span></label>
+      <input class="control" type="text" name="subject" value="{{ prefill_subject|default:'' }}" placeholder="How can we help?" required>
+    </div>
+
+    <div class="field" style="margin-top:6px">
+      <label class="label">Message <span class="hint">*</span></label>
+      <textarea class="control" name="message" rows="8" placeholder="Write your message here..." required>{{ prefill_message|default:'' }}</textarea>
+      <p class="note">We usually reply within 1–2 business days.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit">Send</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
